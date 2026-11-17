@@ -1,0 +1,769 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><title>TradeMate AI</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700&display=swap">
+<script src="https://cdn.jsdelivr.net/npm/lightweight-charts@4.1.3/dist/lightweight-charts.standalone.production.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<style>
+:root{color-scheme:dark;--bg:#000;--card:#0b1226;--line:#1c2745;--tx:#e8ecf8;--mu:#8b97b8;--g:#10b981;--r:#ef4444;--p:#8b5cf6;--n:#6b7280;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+*,*::before,*::after{box-sizing:inherit}html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--tx);font:400 15px/1.6 Sora,system-ui,sans-serif}
+a{color:inherit;text-decoration:none}.w{max-width:1180px;margin:0 auto;padding:0 20px}
+nav{display:flex;align-items:center;gap:22px;padding:16px 0;flex-wrap:wrap}nav .l{font-weight:700;font-size:18px;margin-right:auto}nav .l i{font-style:normal;color:var(--p)}
+nav a.m{color:var(--mu)}nav a.m:hover{color:var(--tx)}
+.b{border:1px solid var(--line);background:transparent;color:var(--tx);padding:9px 16px;border-radius:8px;font:inherit;cursor:pointer}.b:focus-visible,.t:focus-visible,select:focus-visible,input:focus-visible{outline:2px solid var(--p);outline-offset:2px}
+.b.p{background:var(--p);border-color:var(--p);font-weight:600}.b:hover{border-color:var(--p)}
+.hero{padding:56px 0 36px;max-width:760px}h1{font-size:clamp(34px,6vw,60px);line-height:1.08;margin:0 0 18px;letter-spacing:-.02em}
+.hero p{color:var(--mu);font-size:17px;max-width:600px}.hero .row{display:flex;gap:12px;margin-top:24px;flex-wrap:wrap}
+h2{font-size:clamp(24px,3.4vw,34px);margin:70px 0 8px;letter-spacing:-.01em}.sub{color:var(--mu);margin:0 0 24px;max-width:640px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:18px}
+.grid{display:grid;gap:16px}.dash{grid-template-columns:minmax(0,2fr) minmax(0,1fr)}
+@media(max-width:860px){.dash{grid-template-columns:1fr}}
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}.t{background:none;border:1px solid var(--line);color:var(--mu);padding:5px 11px;border-radius:6px;font:inherit;font-size:13px;cursor:pointer}.t.on{background:var(--p);border-color:var(--p);color:#fff}
+#ch{height:340px;margin-top:8px}
+.st{display:inline-block;padding:4px 12px;border-radius:6px;font-weight:700;font-size:13px}.BUY{background:#10b98122;color:var(--g)}.SELL{background:#ef444422;color:var(--r)}.WAIT{background:#6b728033;color:#b6bdcc}
+.kv{display:grid;grid-template-columns:1fr auto;gap:5px 12px;font-size:13px;margin:12px 0}.kv span:nth-child(odd){color:var(--mu)}.kv span:nth-child(even){text-align:right;font-variant-numeric:tabular-nums}
+.bull{color:var(--g)}.bear{color:var(--r)}.neu{color:#b6bdcc}
+.bar{height:8px;background:var(--line);border-radius:4px;overflow:hidden}.bar i{display:block;height:100%;background:var(--p)}
+table{width:100%;border-collapse:collapse;font-size:13px}td,th{padding:7px 6px;border-bottom:1px solid var(--line);text-align:left;font-weight:400}th{color:var(--mu)}
+.wrap{overflow-x:auto}.note{font-size:12px;color:var(--mu)}.tag{font-size:11px;border:1px solid var(--p);color:#c4b5fd;border-radius:5px;padding:1px 7px}
+.f3{grid-template-columns:repeat(auto-fit,minmax(240px,1fr))}.f3 h3{margin:0 0 6px;font-size:16px}.f3 p{margin:0;color:var(--mu);font-size:14px}
+.price{position:relative}.price.pop{border-color:var(--p)}.price .pp{font-size:34px;font-weight:700}.price ul{padding-left:18px;color:var(--mu);font-size:13px;min-height:150px}
+.pop span.mp{position:absolute;top:-11px;right:14px;background:var(--p);font-size:11px;font-weight:700;padding:2px 10px;border-radius:5px}
+input,select,textarea{background:#050a18;border:1px solid var(--line);color:var(--tx);border-radius:6px;padding:8px;font:inherit;width:100%}label{font-size:12px;color:var(--mu)}
+.rc{grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
+details{border-bottom:1px solid var(--line);padding:14px 0}summary{cursor:pointer;font-weight:600}details p{color:var(--mu);margin:8px 0 0}
+footer{margin:80px 0 30px;color:var(--mu);font-size:12px}
+dialog{background:var(--card);color:var(--tx);border:1px solid var(--line);border-radius:12px;max-width:380px}dialog::backdrop{background:#000a}
+@media(prefers-reduced-motion:no-preference){.st{transition:background .3s}.bar i{transition:width .5s}}
+textarea{resize:vertical}dialog label{display:block;margin:10px 0 4px}#am,#tmPd{width:min(380px,calc(100% - 32px))}
+.hid{display:none!important}.err{color:var(--r);font-size:13px;min-height:18px;margin:8px 0}.ok{color:var(--g)}
+.sp{display:inline-block;width:13px;height:13px;border:2px solid var(--line);border-top-color:var(--p);border-radius:50%;vertical-align:-2px;margin-right:6px}
+@media(prefers-reduced-motion:no-preference){.sp{animation:spin .7s linear infinite}}@keyframes spin{to{transform:rotate(360deg)}}
+#toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px 16px;font-size:13px;max-width:90vw;z-index:50}
+.av{width:44px;height:44px;border-radius:50%;object-fit:cover;background:var(--line);display:inline-flex;align-items:center;justify-content:center;font-weight:700}
+.jf{grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}.shot{width:44px;height:32px;object-fit:cover;border-radius:4px;border:1px solid var(--line);cursor:pointer}.b[disabled]{opacity:.6;cursor:wait}
+.ov{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;background:#0b1226e6;text-align:center;padding:16px;font-size:14px;z-index:3}.ov span{color:var(--mu);max-width:420px}
+.tag.live{border-color:var(--g);color:var(--g)}.tag.dl{border-color:#f59e0b;color:#f59e0b}.tag.bad{border-color:var(--r);color:var(--r)}.warn{color:#f59e0b!important}.t[disabled]{opacity:.5;cursor:not-allowed}
+/* ===== Auto Trading Bot (paper only). Reuses the existing theme variables and classes; everything new is prefixed .bt- ===== */
+#autobot h2 .tag{font-size:12px;font-weight:600;letter-spacing:.04em;margin-left:10px;vertical-align:middle}
+.bt-top{display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap}
+.bt-state{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.bt-pill{font-size:13px;font-weight:700;padding:5px 14px;letter-spacing:.04em}
+.bt-pill::before{content:"";display:inline-block;width:8px;height:8px;border-radius:50%;background:currentColor;margin-right:8px;vertical-align:1px}
+@media(prefers-reduced-motion:no-preference){.bt-pill.live::before{animation:btpulse 1.6s ease-in-out infinite}}
+@keyframes btpulse{50%{opacity:.25}}
+.bt-btns{display:flex;gap:10px;flex-wrap:wrap}
+.b.bt-go{background:var(--g);border-color:var(--g);color:#031b12;font-weight:700}
+.b.bt-go:hover{border-color:#34d399;background:#34d399}
+.b.bt-danger{border-color:var(--r);color:#fecaca;background:#ef444414;font-weight:700}
+.b.bt-danger:hover{background:var(--r);color:#fff}
+.b[disabled]{opacity:.45;cursor:not-allowed}
+.b.bt-busy[disabled]{cursor:wait;opacity:.7}
+.bt-banner{border-color:var(--p);display:flex;gap:10px;align-items:flex-start;margin-bottom:16px}
+.bt-banner b{white-space:nowrap}
+.bt-k{font-size:12px;color:var(--mu)}
+.bt-v{font-size:20px;font-weight:700;font-variant-numeric:tabular-nums;line-height:1.3}
+.bt-v small{font-size:12px;font-weight:400;margin-left:4px}
+.bt-stats .card{padding:12px 14px}
+.bt-meters{grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}
+.bt-meters .bar{margin:8px 0 6px;height:10px}
+.bt-eq{width:100%;height:170px;display:block;margin-top:8px}
+.bt-col{display:grid;grid-template-columns:minmax(0,1fr);gap:16px;align-content:start;min-width:0}
+@media(max-width:860px){#autobot .dash{grid-template-columns:minmax(0,1fr)}}
+.bt-h{display:block;font-size:11px;color:var(--mu);margin-top:2px;line-height:1.35}
+.bt-grp{margin:18px 0 8px;font-size:13px;font-weight:600}
+.bt-chk{display:flex;gap:8px;align-items:center;margin:8px 0;font-size:13px;color:var(--tx)}
+.bt-chk input{width:auto}
+.bt-tb td,.bt-tb th{white-space:nowrap}
+.bt-tb td small{color:var(--mu)}
+.bt-log{max-height:340px;overflow:auto;font-size:13px;border-top:1px solid var(--line);margin-top:8px}
+.bt-log div{display:grid;grid-template-columns:118px 66px 1fr;gap:8px;padding:6px 2px;border-bottom:1px solid var(--line)}
+.bt-log .t0{color:var(--mu);font-variant-numeric:tabular-nums}
+.bt-log .k{color:var(--mu);text-transform:uppercase;font-size:11px;letter-spacing:.04em;padding-top:2px}
+.bt-log .error .m{color:var(--r)}.bt-log .warn .m{color:#f59e0b}
+@media(max-width:560px){.bt-log div{grid-template-columns:1fr}.bt-log .k{display:none}}
+.bt-chips{display:flex;gap:6px;flex-wrap:wrap}
+.bt-chips .t[aria-pressed=true]{background:var(--p);border-color:var(--p);color:#fff}
+.bt-lock{opacity:.55}
+.bt-sep{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+.bt-up{color:var(--g)}.bt-dn{color:var(--r)}
+@media(prefers-reduced-motion:no-preference){.bt-fl-up{animation:btup 1.2s ease-out}.bt-fl-dn{animation:btdn 1.2s ease-out}}
+@keyframes btup{from{background:#10b98133}to{background:transparent}}
+@keyframes btdn{from{background:#ef444433}to{background:transparent}}
+#btFatal p{margin:6px 0}
+</style></head><body>
+<div class="w">
+<nav><a class="l" href="#">Trade<i>Mate</i> AI</a><a class="m" href="#dash">Dashboard</a><a class="m" href="#autobot">Auto Bot</a><a class="m" href="#journal">Journal</a><a class="m" href="#engine">How signals work</a><a class="m" href="#risk">Risk</a><a class="m" href="#plans">Pricing</a><a class="m" href="#faq">FAQ</a>
+<span id="navOut" style="display:contents"><button class="b" onclick="TM.open('login')">Log in</button><button class="b p" onclick="TM.open('signup')">Create account</button></span><span id="navIn" class="hid" style="display:contents"><button class="b" id="navUser" onclick="TM.profile()">Account</button><button class="b" onclick="TM.logout()">Log out</button></span></nav>
+
+<header class="hero"><h1>Smarter Analysis. Stronger Decisions.</h1>
+<p>Six indicators, five timeframes, one confirmation score. TradeMate AI shows a setup only when the evidence agrees, and says NO TRADE when it doesn’t.</p>
+<div class="row"><a class="b p" href="#dash">Open live dashboard</a><a class="b" href="#engine">See the logic</a></div></header>
+
+<section id="dash"><div class="card" style="margin-bottom:16px;border-color:var(--p)"><b>Data notice:</b> <span class="note">Prices come from <b>Twelve Data</b> through a secure server, so no API key is ever in this page. Every panel is labeled LIVE, DELAYED, MARKET CLOSED, STALE, API LIMIT or UNAVAILABLE based on the real candle timestamps. Delay and availability depend on the provider plan. Only the selected pair and timeframe are requested; results are cached in your browser and nothing is requested while this tab is hidden. Indicators and signals use completed candles only. This dashboard is analysis only: no broker connection and no order execution. The Auto Bot below trades a simulated paper account only.</span></div>
+<div class="tabs" id="syms"></div><div class="tabs" id="tfs"></div>
+<div class="grid dash">
+<div class="card"><div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px"><b id="ct"></b><span style="display:flex;gap:8px;align-items:center"><span class="tag" id="dtag">LOADING</span><button class="t" id="rf" onclick="manualRefresh()">Refresh</button></span></div><p class="note" id="dts" style="margin:6px 0 0"></p><p class="note" id="dw" style="margin:2px 0 0" role="status"></p><div style="position:relative"><div id="ch"></div><div class="ov hid" id="chMsg" role="alert"></div></div>
+<p class="note">Lines: EMA 20 (purple), EMA 50 (blue), EMA 200 (grey). The forming candle is excluded from every calculation.</p></div>
+<div class="card" id="sig"></div></div>
+<div class="grid dash" style="margin-top:16px">
+<div class="card"><b>Multi-timeframe trend</b><p class="note" id="wf"></p><div class="wrap"><table id="mtf"></table></div></div>
+<div class="card"><b>Watchlist (M15)</b><div class="wrap"><table id="wl"></table></div><p class="note">Other pairs load only when you select them (click a symbol), and signals appear for the selected pair. This keeps requests within your API plan.</p></div></div>
+<div class="card" id="acct" style="margin-top:16px"></div></section>
+
+<section id="autobot"><h2>Auto trading bot<span class="tag">PAPER TRADING ONLY</span></h2>
+<p class="sub">Let the TradeMate AI confirmation engine trade a simulated account for you, on the server, around the clock. Virtual money only: no broker is connected and no real order is ever placed.</p>
+
+<div class="card" id="btOut"><b>Log in to use the Auto Bot</b><p class="note">Your simulated account, positions and activity log are private to you. Analysis keeps running on the server after you close this page.</p><button class="b p" onclick="TM.open('login')">Log in</button> <button class="b" onclick="TM.open('signup')">Create account</button></div>
+<div class="card hid" id="btFatal" role="alert" style="border-color:var(--r)"></div>
+
+<div id="btIn" class="hid">
+<div class="card bt-banner"><b>Paper trading only.</b><span class="note">Every balance, position and trade below is a simulation with virtual money. Simulated fills (slippage, stop and target hits) are estimates from candle data and will differ from what any real broker would give you. Results are not a prediction of future performance.</span></div>
+
+<div class="card">
+<div class="bt-top">
+<div class="bt-state"><span class="tag bt-pill" id="btPill">LOADING</span><span class="tag" id="btLink" title="How this page receives updates"></span><span class="note" id="btRun"></span></div>
+<div class="bt-btns"><button class="b bt-go" id="btStart" type="button">Start bot</button><button class="b" id="btStop" type="button">Stop bot</button><button class="b bt-danger" id="btEmg" type="button" title="Closes every simulated position at the last known price and halts the bot">Emergency stop</button></div>
+</div>
+<p class="note" id="btHalt" role="status" style="margin:10px 0 0"></p>
+<p class="err" id="btMsg" role="alert"></p>
+<p class="note" id="btPlan" style="margin:0"></p>
+</div>
+
+<div class="grid rc bt-stats" id="btStats" style="margin-top:16px"></div>
+<div class="grid bt-meters" id="btMeters" style="margin-top:16px"></div>
+
+<div class="grid dash" style="margin-top:16px">
+<div class="bt-col">
+<div class="card"><div class="bt-sep"><b>Equity curve</b><span class="note">Realised balance after each closed simulated trade</span></div><div id="btEq"></div></div>
+<div class="card"><div class="bt-sep"><b>Live analysis</b><span class="note" id="btAnTs"></span></div><div class="wrap"><table class="bt-tb" id="btAn"></table></div>
+<p class="note">Signals use completed candles only, with the same six-indicator engine as the dashboard above. The server fetches prices through your market-data function and analyses every minute.</p></div>
+</div>
+<div class="card"><b>Bot settings</b>
+<form id="btForm" novalidate>
+<div class="bt-grp" style="margin-top:12px">Markets</div><div class="bt-chips" id="btSyms" role="group" aria-label="Markets"></div>
+<div class="bt-grp">Timeframe</div><div class="bt-chips" id="btTfs" role="group" aria-label="Timeframe"></div>
+<p class="note" id="btLockNote" style="margin:8px 0 0"></p>
+<div id="btFields"></div>
+<p class="err" id="btCfgErr" role="alert"></p>
+<div style="display:flex;gap:10px;flex-wrap:wrap"><button class="b p" id="btSave" type="submit">Save settings</button><button class="b hid" id="btDiscard" type="button">Discard changes</button></div>
+</form>
+<details style="margin-top:14px"><summary>Paper account</summary>
+<p class="note">Reset deletes all simulated positions and trade history and restores a fresh virtual balance. The activity log is kept. The bot must be stopped with no open positions.</p>
+<div style="display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap"><div style="flex:1;min-width:140px"><label for="btBal">Starting balance ($)</label><input id="btBal" type="number" min="100" max="10000000" step="100" value="10000"></div><button class="b" id="btReset" type="button">Reset paper account</button></div></details>
+</div>
+</div>
+
+<div class="card" style="margin-top:16px"><div class="bt-sep"><b>Open positions (simulated)</b><span class="note" id="btPosTs"></span></div><div class="wrap" id="btPos" style="margin-top:8px"></div></div>
+<div class="card" style="margin-top:16px"><div class="bt-sep"><b>Trade history (simulated)</b><span class="note">Times in UTC</span></div><div class="wrap" id="btHist" style="margin-top:8px"></div></div>
+<div class="card" style="margin-top:16px"><div class="bt-sep"><b>Bot activity log</b><span class="note">Saved in your account · times in UTC</span></div><div class="bt-log" id="btLog" aria-live="off"></div></div>
+
+<details style="margin-top:8px"><summary>How the bot trades</summary>
+<p>Every minute a background job on the server checks each running bot. It loads completed candles for your markets, runs the same EMA, RSI, MACD, ADX and structure checks as the dashboard, and looks for a BUY or SELL setup whose score is at or above your minimum.</p>
+<p>A signal opens one simulated position per market (never a duplicate for the same candle). Size comes from your risk per trade and the stop distance (ATR × your multiplier); the target is the stop distance × your reward:risk. Stops and targets are checked against candle highs and lows, and if one candle touches both the stop is assumed to hit first.</p>
+<p>If the daily loss limit or max drawdown is reached, every simulated position is closed and the bot halts. The emergency stop does the same on demand. Nothing on this page, or in the server code behind it, connects to a broker.</p></details>
+</div></section>
+
+<section id="journal"><h2>Trading journal</h2><p class="sub">Log trades, notes and screenshots. Entries are private to your account.</p>
+<div class="card" id="jrOut"><b>Log in to use your journal</b><p class="note">Your entries are stored in your own private space and only you can read them.</p><button class="b p" onclick="TM.open('login')">Log in</button> <button class="b" onclick="TM.open('signup')">Create account</button></div>
+<div id="jrIn" class="hid"><form class="card" id="jrForm" novalidate><b id="jrTitle">New entry</b>
+<div class="grid jf" style="margin-top:12px">
+<div><label for="jrSym">Symbol</label><input id="jrSym" maxlength="20" placeholder="XAUUSD"></div>
+<div><label for="jrDir">Side</label><select id="jrDir"><option value="buy">Buy</option><option value="sell">Sell</option></select></div>
+<div><label for="jrEn">Entry</label><input id="jrEn" type="number" step="any"></div>
+<div><label for="jrEx">Exit</label><input id="jrEx" type="number" step="any"></div>
+<div><label for="jrSl">Stop loss</label><input id="jrSl" type="number" step="any"></div>
+<div><label for="jrTp">Take profit</label><input id="jrTp" type="number" step="any"></div>
+<div><label for="jrSz">Size</label><input id="jrSz" type="number" step="any"></div>
+<div><label for="jrPl">P&amp;L ($)</label><input id="jrPl" type="number" step="any"></div>
+<div><label for="jrRes">Result</label><select id="jrRes"><option value="open">Open</option><option value="win">Win</option><option value="loss">Loss</option><option value="breakeven">Breakeven</option></select></div>
+<div><label for="jrDt">Date and time</label><input id="jrDt" type="datetime-local"></div>
+<div><label for="jrFile">Screenshot</label><input id="jrFile" type="file" accept="image/png,image/jpeg,image/webp,image/gif"></div></div>
+<label for="jrNotes">Notes</label><textarea id="jrNotes" rows="3" maxlength="5000" placeholder="Why did you take this trade?"></textarea>
+<p class="err" id="jrErr" role="alert"></p>
+<div style="display:flex;gap:10px;flex-wrap:wrap"><button class="b p" id="jrSave">Save entry</button><button class="b hid" id="jrCancel" type="button">Cancel edit</button></div></form>
+<div class="card" style="margin-top:16px"><b>Your entries</b><div class="wrap" id="jrList" style="margin-top:8px"></div></div></div></section>
+
+<section id="engine"><h2>The confirmation engine</h2><p class="sub">A setup needs every condition to agree. Otherwise the answer is NO TRADE.</p>
+<div class="grid f3">
+<div class="card"><h3 class="bull">BUY setup</h3><p>Price above EMA 200, EMA 20 above EMA 50, RSI above 50, MACD bullish, ADX above 20, bullish structure (higher highs and higher lows).</p></div>
+<div class="card"><h3 class="bear">SELL setup</h3><p>Price below EMA 200, EMA 20 below EMA 50, RSI below 50, MACD bearish, ADX above 20, bearish structure (lower highs and lower lows).</p></div>
+<div class="card"><h3>Score out of 100</h3><p>EMA alignment 20, RSI 15, MACD 15, ADX 10, structure 20, multi-timeframe 20. 90+ very strong, 75–89 strong, 60–74 moderate, below 60 no trade.</p></div>
+<div class="card"><h3>Not a win probability</h3><p>The score measures how many technical checks agree. It does not predict the outcome of a trade, and past setups do not guarantee future results.</p></div></div></section>
+
+<section id="risk"><h2>Risk calculator</h2><p class="sub">Size the position before you size the dream.</p>
+<div class="card"><div class="grid rc">
+<div><label for="ac">Account ($)</label><input id="ac" type="number" value="10000"></div>
+<div><label for="rp">Risk per trade (%)</label><input id="rp" type="number" value="1" step=".1"></div>
+<div><label for="en">Entry</label><input id="en" type="number" value="2350" step="any"></div>
+<div><label for="sl">Stop loss</label><input id="sl" type="number" value="2342" step="any"></div>
+<div><label for="tp">Take profit</label><input id="tp" type="number" value="2368" step="any"></div>
+<div><label for="dl">Daily loss limit (%)</label><input id="dl" type="number" value="3"></div></div>
+<div class="kv" id="rout" style="margin-top:16px"></div>
+<p class="note">Position size here is in price units per 1 unit of the instrument. Convert to lots using your broker’s contract size.</p></div></section>
+
+<section id="plans"><h2>Pricing</h2><p class="sub">Start free. Upgrade when you need more instruments and timeframes.</p>
+<div class="tabs"><button class="t on" id="mo" onclick="bill(0)">Monthly</button><button class="t" id="yo" onclick="bill(1)">Annual (2 months free)</button></div>
+<div class="grid f3" id="pl"></div>
+<p class="note">Stripe Checkout, subscriptions and billing history need a server. They are not active in this demo.</p></section>
+
+<section><h2>What traders say</h2><p class="sub">Placeholders only. No real testimonials have been collected yet.</p>
+<div class="grid f3"><div class="card"><span class="tag">PLACEHOLDER</span><p>“Testimonial text goes here.”</p><p class="note">Name, role</p></div><div class="card"><span class="tag">PLACEHOLDER</span><p>“Testimonial text goes here.”</p><p class="note">Name, role</p></div><div class="card"><span class="tag">PLACEHOLDER</span><p>“Testimonial text goes here.”</p><p class="note">Name, role</p></div></div></section>
+
+<section id="faq"><h2>FAQ</h2>
+<details><summary>Do you guarantee accuracy or profit?</summary><p>No. Signals are analytical information, not financial advice. Trading carries a risk of loss.</p></details>
+<details><summary>Do signals repaint?</summary><p>No. Signals use completed candles only, so a past signal never changes.</p></details>
+<details><summary>Does TradeMate place trades for me?</summary><p>Never with real money. TradeMate has no broker connection and cannot place a real order. The optional Auto Bot trades a simulated paper account with virtual money, so you can test a strategy without risk.</p></details>
+<details><summary>Where does the price data come from?</summary><p>Twelve Data, fetched by a secure server so the API key is never exposed. Each panel shows whether the data is live, delayed, stale or unavailable, with the time of the latest candle. Some intervals or instruments may not be available on every Twelve Data plan.</p></details>
+<details><summary>Are the performance stats real?</summary><p>Backtested and live results are reported separately with sample sizes. Nothing is shown until it has been measured.</p></details></section>
+
+<footer>TradeMate AI provides technical analysis for education and information only. It is not financial advice. Confirmation scores are not win probabilities. Markets can move against any setup.</footer></div>
+
+<dialog id="am"><div class="tabs" id="tmTabs"><button class="t on" id="tmTl" type="button">Log in</button><button class="t" id="tmTs" type="button">Create account</button></div>
+<form id="tmF" novalidate>
+<div id="fName" class="hid"><label for="tmN">Full name</label><input id="tmN" autocomplete="name" maxlength="80"></div>
+<div id="fEm"><label for="tmE">Email</label><input id="tmE" type="email" autocomplete="email"></div>
+<div id="fPw"><label for="tmP" id="lPw">Password</label><input id="tmP" type="password" autocomplete="current-password"></div>
+<p class="err" id="tmErr" role="alert"></p><button class="b p" id="tmGo" style="width:100%">Log in</button></form>
+<div id="tmAlt"><button class="b" id="tmG" type="button" style="width:100%;margin-top:8px">Continue with Google</button></div>
+<div style="display:flex;justify-content:space-between;gap:8px;margin-top:12px"><button class="t" id="tmFp" type="button">Forgot password?</button><button class="t hid" id="tmBk" type="button">Back to log in</button><button class="t" type="button" onclick="this.closest('dialog').close()">Close</button></div></dialog>
+<dialog id="tmPd"><form id="pfForm" novalidate><b>Your profile</b>
+<div style="display:flex;gap:12px;align-items:center;margin:12px 0" id="pfAv"></div>
+<label for="pfFile">Profile picture</label><input id="pfFile" type="file" accept="image/png,image/jpeg,image/webp,image/gif">
+<label for="pfName">Full name</label><input id="pfName" maxlength="80">
+<label for="pfEm">Email</label><input id="pfEm" disabled>
+<div class="kv"><span>Plan</span><span id="pfPlan"></span><span>Member since</span><span id="pfSince"></span></div>
+<p class="err" id="pfErr" role="alert"></p>
+<div style="display:flex;gap:10px"><button class="b p" id="pfSave">Save</button><button class="b" type="button" onclick="this.closest('dialog').close()">Close</button></div></form></dialog>
+<div id="toast" class="hid" role="status"></div>
+
+
+<script>
+const S={EURUSD:{p:'EUR/USD',d:5},GBPUSD:{p:'GBP/USD',d:5},USDJPY:{p:'USD/JPY',d:3},XAUUSD:{p:'XAU/USD',d:2}};
+const TF=['M1','M5','M15','H1','H4'];
+let sym='EURUSD',tf='M15',per=0,chart,ser={};
+const ema=(a,p)=>{const k=2/(p+1);let e=a[0];return a.map((x,i)=>i?e=x*k+e*(1-k):e)};
+function rsi(c,p=14){let g=0,l=0,o=[];for(let i=1;i<c.length;i++){const d=c[i]-c[i-1];if(i<=p){g+=Math.max(d,0)/p;l+=Math.max(-d,0)/p}else{g=(g*(p-1)+Math.max(d,0))/p;l=(l*(p-1)+Math.max(-d,0))/p}o.push(100-100/(1+g/(l||1e-9)))}return o.pop()}
+function wil(a,p){let s=a.slice(0,p).reduce((x,y)=>x+y,0),o=[s];for(let i=p;i<a.length;i++)o.push(s=s-s/p+a[i]);return o}
+function adxatr(k,p=14){const tr=[],pd=[],md=[];for(let i=1;i<k.length;i++){const u=k[i].high-k[i-1].high,d=k[i-1].low-k[i].low;pd.push(u>d&&u>0?u:0);md.push(d>u&&d>0?d:0);tr.push(Math.max(k[i].high-k[i].low,Math.abs(k[i].high-k[i-1].close),Math.abs(k[i].low-k[i-1].close)))}
+const T=wil(tr,p),P=wil(pd,p),M=wil(md,p),dx=T.map((t,i)=>{const a=100*P[i]/t,b=100*M[i]/t;return 100*Math.abs(a-b)/((a+b)||1)});
+let ax=dx.slice(0,p).reduce((x,y)=>x+y,0)/p;for(let i=p;i<dx.length;i++)ax=(ax*(p-1)+dx[i])/p;return{adx:ax,atr:T[T.length-1]/p}}
+function struct(k){const H=[],L=[];for(let i=3;i<k.length-3;i++){const w=k.slice(i-3,i+4);if(k[i].high==Math.max(...w.map(x=>x.high)))H.push(k[i].high);if(k[i].low==Math.min(...w.map(x=>x.low)))L.push(k[i].low)}
+const h=H.slice(-2),l=L.slice(-2);if(h.length<2||l.length<2)return{s:0,sr:[null,null]};const s=h[1]>h[0]&&l[1]>l[0]?1:h[1]<h[0]&&l[1]<l[0]?-1:0;return{s,sr:[Math.max(...H.slice(-3)),Math.min(...L.slice(-3))]}}
+function core(k){const c=k.map(x=>x.close),e20=ema(c,20),e50=ema(c,50),e200=ema(c,200),e26=ema(c,26),m=ema(c,12).map((x,i)=>x-e26[i]),sg=ema(m,9),i=c.length-1,aa=adxatr(k),st=struct(k);
+return{c,e20,e50,e200,px:c[i],E:[e20[i],e50[i],e200[i]],rsi:rsi(c),macd:m[i],sig:sg[i],adx:aa.adx,atr:aa.atr,st,trend:c[i]>e200[i]&&e20[i]>e50[i]?1:c[i]<e200[i]&&e20[i]<e50[i]?-1:0}}
+const lv=s=>s>=90?'Very strong confirmation':s>=75?'Strong confirmation':s>=60?'Moderate confirmation':'Below 60: no trade';
+const tx=v=>v>0?['Bullish','bull']:v<0?['Bearish','bear']:['Neutral','neu'];
+const f=(v,sy)=>v.toFixed(S[sy||sym].d);
+function initChart(){chart=LightweightCharts.createChart(document.getElementById('ch'),{layout:{background:{color:'#0b1226'},textColor:'#8b97b8'},grid:{vertLines:{color:'#141d38'},horzLines:{color:'#141d38'}},autoSize:true,timeScale:{timeVisible:true},rightPriceScale:{borderColor:'#1c2745'}});
+ser.c=chart.addCandlestickSeries({upColor:'#10b981',downColor:'#ef4444',borderVisible:false,wickUpColor:'#10b981',wickDownColor:'#ef4444'});
+[['a','#8b5cf6'],['b','#3b82f6'],['d','#9ca3af']].forEach(([n,c])=>ser[n]=chart.addLineSeries({color:c,lineWidth:1,priceLineVisible:false,lastValueVisible:false}))}
+const P=[['Free',0,0,['2 instruments','Basic indicators','5 AI analyses/month','Basic dashboard','Limited signal history']],['Starter',9,90,['5 instruments','EMA, RSI, MACD','50 AI analyses/month','M5, M15, H1','Basic history and alerts']],['Pro',19,190,['All instruments and indicators','Multi-timeframe analysis','200 AI analyses/month','Full signal history','Journal, risk calculator, email alerts'],1],['Premium',39,390,['Everything in Pro','Unlimited journal entries','500 AI analyses/month','Advanced backtesting and strategy comparison','All timeframes, priority support']]];
+function bill(y){per=y;mo.className='t'+(y?'':' on');yo.className='t'+(y?' on':'');pl.innerHTML=P.map(p=>`<div class="card price ${p[4]?'pop':''}">${p[4]?'<span class="mp">MOST POPULAR</span>':''}<h3>${p[0]}</h3><div class="pp">$${y?p[2]:p[1]}<span class="note">/${y?'year':'month'}</span></div><ul>${p[3].map(x=>'<li>'+x+'</li>').join('')}</ul><button class="b ${p[4]?'p':''}" style="width:100%" onclick="TM.plan()">${p[1]?'Choose '+p[0]:'Start free'}</button></div>`).join('')}
+function risk(){const g=id=>+document.getElementById(id).value,ac=g('ac'),rp=g('rp'),en=g('en'),sl=g('sl'),tp=g('tp'),dl=g('dl'),dist=Math.abs(en-sl),amt=ac*rp/100,rr=dist?Math.abs(tp-en)/dist:0;
+rout.innerHTML=`<span>Amount at risk</span><span>$${amt.toFixed(2)}</span><span>Stop distance</span><span>${dist.toFixed(4)}</span><span>Position size (units)</span><span>${dist?(amt/dist).toFixed(3):'n/a'}</span><span>Risk to reward</span><span>1 : ${rr.toFixed(2)}</span><span>Daily loss limit</span><span>$${(ac*dl/100).toFixed(2)} (${dist&&amt?Math.floor(ac*dl/100/amt):0} full-risk losses)</span>`}
+document.querySelectorAll('#risk input').forEach(i=>i.oninput=risk);
+</script>
+<script>
+/* ===== Supabase backend. Paste your Project URL and Publishable key. Never put a secret or service_role key in this file. ===== */
+const SUPABASE_URL='https://tsvlizamhhzrtzgolifi.supabase.co',SUPABASE_PUBLISHABLE_KEY='sb_publishable_L8owWTtQMorCNiSlmu9YeQ_pSN-H025';
+const TM=(()=>{
+const $=id=>document.getElementById(id),esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const sdk=!!window.supabase,cfg=!SUPABASE_URL.startsWith('YOUR_')&&!SUPABASE_PUBLISHABLE_KEY.startsWith('YOUR_'),ready=sdk&&cfg;
+const sb=ready?supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}}):null;
+const back=location.origin+location.pathname,EXT={'image/png':'png','image/jpeg':'jpg','image/webp':'webp','image/gif':'gif'},PLAN={free:'Free',starter:'Starter',pro:'Pro',premium:'Premium'};
+let user=null,profile=null,entries=[],urls={},mode='login',editId=null,manual=false,loading=false,tt;
+const toast=m=>{const t=$('toast');t.textContent=m;t.classList.remove('hid');clearTimeout(tt);tt=setTimeout(()=>t.classList.add('hid'),4500)};
+const say=(id,t,good)=>{const e=$(id);e.textContent=t||'';e.className='err'+(good?' ok':'')};
+const busy=(b,on,t)=>{if(on){b.dataset.t=b.textContent;b.innerHTML='<span class="sp"></span>'+(t||'Please wait');b.disabled=true}else{b.textContent=b.dataset.t;b.disabled=false}};
+const msg=e=>{const m=(e&&e.message)||'Something went wrong. Please try again.';return/invalid login/i.test(m)?'Incorrect email or password.':/not confirmed/i.test(m)?'Please verify your email first. Check your inbox.':/rate limit|too many/i.test(m)?'Too many attempts. Please wait a few minutes.':/failed to fetch|network/i.test(m)?'Network error. Check your connection and try again.':/row-level security/i.test(m)?'You do not have permission to do that.':m};
+const dead=e=>!!e&&(+(e.status||e.statusCode)===401||/jwt|token.*expired|session.*(expired|missing)/i.test(e.message||''));
+const guard=e=>{if(!dead(e))return false;sb.auth.signOut({scope:'local'});return true};
+const since=()=>new Date(profile.created_at||user.created_at).toLocaleDateString(undefined,{year:'numeric',month:'short',day:'numeric'});
+const avatar=()=>profile.url?`<img class="av" src="${esc(profile.url)}" alt="Profile picture">`:`<span class="av">${esc((profile.full_name||profile.email||'?')[0].toUpperCase())}</span>`;
+function setMode(m){mode=m;$('tmGo').textContent={login:'Log in',signup:'Create account',forgot:'Send reset link',reset:'Set new password'}[m];say('tmErr','');
+$('fName').classList.toggle('hid',m!=='signup');$('fEm').classList.toggle('hid',m==='reset');$('fPw').classList.toggle('hid',m==='forgot');$('tmTabs').classList.toggle('hid',m==='forgot'||m==='reset');
+$('tmAlt').classList.toggle('hid',m==='forgot'||m==='reset');$('tmFp').classList.toggle('hid',m!=='login');$('tmBk').classList.toggle('hid',m!=='forgot');
+$('tmTl').classList.toggle('on',m==='login');$('tmTs').classList.toggle('on',m==='signup');$('lPw').textContent=m==='reset'?'New password':'Password';$('tmP').autocomplete=m==='login'?'current-password':'new-password'}
+function openAuth(m){setMode(m);if(!$('am').open)$('am').showModal()}
+const notReady=()=>!sdk?'Could not load the Supabase library. Check your connection.':'Supabase is not configured yet. Add your project URL and publishable key at the top of the script.';
+async function submit(ev){ev.preventDefault();const b=$('tmGo'),em=$('tmE').value.trim(),pw=$('tmP').value,nm=$('tmN').value.trim();say('tmErr','');
+if(!ready)return say('tmErr',notReady());
+if(mode!=='reset'&&!/^\S+@\S+\.\S+$/.test(em))return say('tmErr','Enter a valid email address.');
+if(mode==='signup'&&!nm)return say('tmErr','Enter your full name.');
+if((mode==='signup'||mode==='reset')&&pw.length<8)return say('tmErr','Password must be at least 8 characters.');
+if(mode==='login'&&!pw)return say('tmErr','Enter your password.');
+busy(b,true);
+try{if(mode==='login'){const{error}=await sb.auth.signInWithPassword({email:em,password:pw});if(error)throw error;$('am').close();toast('Welcome back.')}
+else if(mode==='signup'){const{data,error}=await sb.auth.signUp({email:em,password:pw,options:{data:{full_name:nm},emailRedirectTo:back}});if(error)throw error;
+if(data.user&&data.user.identities&&!data.user.identities.length)say('tmErr','An account with this email already exists. Log in instead.');
+else if(data.session){$('am').close();toast('Account created.')}else say('tmErr','Check your inbox and click the verification link, then log in.',1)}
+else if(mode==='forgot'){const{error}=await sb.auth.resetPasswordForEmail(em,{redirectTo:back});if(error)throw error;say('tmErr','If an account exists for that email, a reset link is on its way.',1)}
+else{const{error}=await sb.auth.updateUser({password:pw});if(error)throw error;$('tmP').value='';$('am').close();toast('Password updated.')}
+}catch(e){say('tmErr',msg(e))}finally{busy(b,false)}}
+async function google(){if(!ready)return say('tmErr',notReady());const b=$('tmG');busy(b,true,'Redirecting');const{error}=await sb.auth.signInWithOAuth({provider:'google',options:{redirectTo:back}});if(error){busy(b,false);say('tmErr',msg(error))}}
+async function logout(){manual=true;const{error}=await sb.auth.signOut();if(error){manual=false;toast(msg(error))}else toast('Logged out.')}
+async function avatarUrl(){const a=profile.avatar_url;profile.url=null;if(!a)return;if(/^https?:/.test(a)){profile.url=a;return}const{data}=await sb.storage.from('avatars').createSignedUrl(a,3600);profile.url=data?data.signedUrl:null}
+async function loadEntries(){const{data,error}=await sb.from('journal_entries').select('*').order('traded_at',{ascending:false});if(error)throw error;entries=data;urls={};
+const ps=entries.filter(x=>x.screenshot_path).map(x=>x.screenshot_path);if(ps.length){const{data:s}=await sb.storage.from('journal-screenshots').createSignedUrls(ps,3600);(s||[]).forEach(x=>{if(x.signedUrl)urls[x.path]=x.signedUrl})}}
+async function load(){if(loading||!user)return;loading=true;
+$('acct').innerHTML='<p class="note"><span class="sp"></span>Loading your account…</p>';$('jrList').innerHTML='<p class="note"><span class="sp"></span>Loading entries…</p>';
+try{const{data,error}=await sb.from('profiles').select('*').eq('id',user.id).maybeSingle();if(error)throw error;
+profile=data||{id:user.id,email:user.email,full_name:(user.user_metadata||{}).full_name||'',plan:'free',created_at:user.created_at};await Promise.all([avatarUrl(),loadEntries()])}
+catch(e){if(!guard(e)){toast(msg(e));profile=profile||{id:user.id,email:user.email,plan:'free',created_at:user.created_at}}}
+finally{loading=false;paint()}}
+function stats(){const c=entries.filter(e=>e.outcome!=='open'),w=c.filter(e=>e.outcome==='win').length;return{t:entries.length,wr:c.length?Math.round(100*w/c.length):null,n:c.reduce((a,e)=>a+(+e.pnl||0),0),b:c.reduce((a,e)=>Math.max(a,+e.pnl||0),0)}}
+function paintAcct(){const el=$('acct');
+if(!user||!profile){el.innerHTML='<b>Your account</b><p class="note">Log in to see your profile, subscription plan and saved trading statistics.</p><button class="b p" onclick="TM.open(\'login\')">Log in</button> <button class="b" onclick="TM.open(\'signup\')">Create account</button>';return}
+const s=stats(),pl=PLAN[profile.plan]||esc(profile.plan||'Free');
+el.innerHTML=`<div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;align-items:center"><div style="display:flex;gap:12px;align-items:center">${avatar()}<div><b>${esc(profile.full_name||'Trader')}</b><div class="note">${esc(profile.email||user.email)}</div></div></div><div><span class="tag">${pl} plan</span> <button class="b" onclick="TM.profile()">Edit profile</button></div></div>
+<div class="grid rc" style="margin-top:16px">${[['Subscription',pl+' plan'],['Member since',since()],['Journal entries',s.t],['Win rate',s.wr==null?'n/a':s.wr+'%'],['Net P&L',(s.n<0?'-':'')+'$'+Math.abs(s.n).toFixed(2)],['Best trade','$'+s.b.toFixed(2)]].map(x=>`<div class="card"><span class="note">${x[0]}</span><div style="font-size:20px;font-weight:700">${esc(x[1])}</div></div>`).join('')}</div>
+<p class="note">Statistics come from your saved journal. Win rate and P&amp;L count closed trades only. Plan changes need billing, which is not connected yet.</p>`}
+function paintJournal(){const rows=entries.map(e=>`<tr><td>${new Date(e.traded_at).toLocaleDateString()}</td><td>${esc(e.symbol)}</td><td class="${e.direction=='buy'?'bull':'bear'}">${e.direction.toUpperCase()}</td><td>${e.entry_price??''}</td><td>${e.exit_price??''}</td><td class="${e.pnl>0?'bull':e.pnl<0?'bear':''}">${e.pnl??''}</td><td>${esc(e.outcome)}</td><td>${urls[e.screenshot_path]?`<img class="shot" src="${esc(urls[e.screenshot_path])}" alt="Screenshot" onclick="window.open(this.src,'_blank','noopener')">`:''}</td><td style="white-space:nowrap"><button class="t" onclick="TM.edit('${e.id}')">Edit</button> <button class="t" onclick="TM.del('${e.id}')">Delete</button></td></tr>${e.notes?`<tr><td colspan="9" class="note">${esc(e.notes)}</td></tr>`:''}`).join('');
+$('jrList').innerHTML=entries.length?`<table><tr><th>Date</th><th>Symbol</th><th>Side</th><th>Entry</th><th>Exit</th><th>P&amp;L</th><th>Result</th><th>Shot</th><th></th></tr>${rows}</table>`:'<p class="note">No entries yet. Save your first trade above.</p>'}
+function paint(){const on=!!user;$('navOut').classList.toggle('hid',on);$('navIn').classList.toggle('hid',!on);$('jrOut').classList.toggle('hid',on);$('jrIn').classList.toggle('hid',!on);
+if(on&&profile)$('navUser').textContent=(profile.full_name||profile.email||'Account').split(' ')[0];paintAcct();if(on)paintJournal();if(window.TMBot)TMBot.sync()}
+async function upload(bucket,f,mb){if(!EXT[f.type])throw new Error('Image must be PNG, JPG, WEBP or GIF.');if(f.size>mb*1048576)throw new Error('Image must be under '+mb+' MB.');
+const p=user.id+'/'+Date.now()+'-'+Math.random().toString(36).slice(2,8)+'.'+EXT[f.type];const{error}=await sb.storage.from(bucket).upload(p,f,{contentType:f.type});if(error)throw error;return p}
+function reset(){editId=null;$('jrForm').reset();say('jrErr','');$('jrTitle').textContent='New entry';$('jrSave').textContent='Save entry';$('jrCancel').classList.add('hid')}
+async function save(ev){ev.preventDefault();const b=$('jrSave'),g=id=>$(id).value.trim(),n=id=>g(id)===''?null:+g(id),f=$('jrFile').files[0];say('jrErr','');let ok=false;
+if(!g('jrSym'))return say('jrErr','Symbol is required.');
+busy(b,true,'Saving');
+try{const row={symbol:g('jrSym').toUpperCase(),direction:$('jrDir').value,entry_price:n('jrEn'),exit_price:n('jrEx'),stop_loss:n('jrSl'),take_profit:n('jrTp'),size:n('jrSz'),pnl:n('jrPl'),outcome:$('jrRes').value,notes:g('jrNotes')||null,traded_at:$('jrDt').value?new Date($('jrDt').value).toISOString():new Date().toISOString()};
+const old=editId?(entries.find(x=>x.id===editId)||{}).screenshot_path:null;
+if(f)row.screenshot_path=await upload('journal-screenshots',f,5);
+const{error}=await(editId?sb.from('journal_entries').update(row).eq('id',editId):sb.from('journal_entries').insert(row));if(error)throw error;
+if(f&&old)sb.storage.from('journal-screenshots').remove([old]);
+await loadEntries();paint();ok=true}
+catch(e){if(!guard(e))say('jrErr',msg(e))}finally{busy(b,false)}
+if(ok){reset();toast('Entry saved.')}}
+function edit(id){const e=entries.find(x=>x.id===id);if(!e)return;editId=id;const v=(k,x)=>$(k).value=x??'';
+v('jrSym',e.symbol);v('jrDir',e.direction);v('jrEn',e.entry_price);v('jrEx',e.exit_price);v('jrSl',e.stop_loss);v('jrTp',e.take_profit);v('jrSz',e.size);v('jrPl',e.pnl);v('jrRes',e.outcome);v('jrNotes',e.notes);
+v('jrDt',new Date(new Date(e.traded_at)-new Date().getTimezoneOffset()*6e4).toISOString().slice(0,16));$('jrFile').value='';
+$('jrTitle').textContent='Edit entry';$('jrSave').textContent='Update entry';$('jrCancel').classList.remove('hid');$('jrForm').scrollIntoView({behavior:'smooth',block:'center'})}
+async function del(id){const e=entries.find(x=>x.id===id);if(!e||!confirm('Delete this entry? This cannot be undone.'))return;
+try{const{error}=await sb.from('journal_entries').delete().eq('id',id);if(error)throw error;if(e.screenshot_path)sb.storage.from('journal-screenshots').remove([e.screenshot_path]);
+if(editId===id)reset();await loadEntries();paint();toast('Entry deleted.')}catch(x){if(!guard(x))toast(msg(x))}}
+function openProfile(){if(!profile)return;$('pfName').value=profile.full_name||'';$('pfEm').value=profile.email||user.email;$('pfFile').value='';
+$('pfAv').innerHTML=avatar()+'<span class="note">PNG, JPG, WEBP or GIF, up to 2 MB</span>';$('pfPlan').textContent=PLAN[profile.plan]||profile.plan;$('pfSince').textContent=since();say('pfErr','');$('tmPd').showModal()}
+async function saveProfile(ev){ev.preventDefault();const b=$('pfSave'),f=$('pfFile').files[0],name=$('pfName').value.trim();say('pfErr','');
+if(!name)return say('pfErr','Enter your full name.');
+busy(b,true,'Saving');let ok=false;
+try{const upd={full_name:name};if(f)upd.avatar_url=await upload('avatars',f,2);
+const{error}=await sb.from('profiles').update(upd).eq('id',user.id);if(error)throw error;
+const old=profile.avatar_url;if(f&&old&&!/^https?:/.test(old))sb.storage.from('avatars').remove([old]);
+loading=false;await load();ok=true}
+catch(e){if(!guard(e))say('pfErr',msg(e))}finally{busy(b,false)}
+if(ok){$('tmPd').close();toast('Profile updated.')}}
+const plan=()=>user?toast('Billing is not connected yet, so plans cannot be changed here.'):openAuth('signup');
+$('tmF').onsubmit=submit;$('tmG').onclick=google;$('tmTl').onclick=()=>setMode('login');$('tmTs').onclick=()=>setMode('signup');$('tmFp').onclick=()=>setMode('forgot');$('tmBk').onclick=()=>setMode('login');
+$('jrForm').onsubmit=save;$('jrCancel').onclick=reset;$('pfForm').onsubmit=saveProfile;
+if(ready){sb.auth.onAuthStateChange((ev,s)=>{const had=!!user;user=s?s.user:null;
+if(ev==='SIGNED_OUT'){profile=null;entries=[];urls={};const exp=had&&!manual;manual=false;paint();if(exp){toast('Your session expired. Please log in again.');openAuth('login')}return}
+if(ev==='PASSWORD_RECOVERY')setTimeout(()=>openAuth('reset'),0);
+if(user&&(!profile||profile.id!==user.id))setTimeout(load,0)})}else console.warn('TradeMate: '+notReady());
+paint();
+return{open:openAuth,logout,profile:openProfile,edit,del,plan,toast,client:()=>sb,user:()=>user}})();
+</script>
+<script>
+/* ===== Live market data. Twelve Data is called ONLY by your Supabase Edge Function "market-data"; the API key never reaches this page.
+   Request budget: only the selected pair and timeframe are fetched (EUR/USD M15 on first open). Nothing is preloaded.
+   Results are cached in memory and in localStorage, duplicate in-flight calls are shared, and nothing is requested while the tab is hidden. ===== */
+const MARKET_API=SUPABASE_URL+'/functions/v1/market-data';
+const E=id=>document.getElementById(id),escH=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const IV={M1:'1min',M5:'5min',M15:'15min',H1:'1h',H4:'4h'},MS={M1:6e4,M5:3e5,M15:9e5,H1:36e5,H4:144e5};
+const TTL={M1:60,M5:90,M15:120,H1:300,H4:600},MINC=210,HOLD=1e4,MAXAGE=18e5,LS='tm_md_v2',LSL='tm_md_limit';
+const C={};let limitUntil=0,gen=0,drawn=null,waitVis=false,loadingAll=false,credits=null;
+const key=(s,t)=>s+'|'+t,ent=(s,t)=>C[key(s,t)]||(C[key(s,t)]={sy:s,t,st:'idle'});
+const er=(kind,message,retry)=>Object.assign(new Error(message),{kind,retry});
+const utc=ms=>new Date(ms).toISOString().slice(0,16).replace('T',' ')+' UTC',hms=ms=>new Date(ms).toISOString().slice(11,19)+' UTC';
+const ago=ms=>{const s=Math.max(0,Math.round(ms/1000));return s<60?s+'s':s<3600?Math.floor(s/60)+'m '+s%60+'s':s<86400?Math.floor(s/3600)+'h '+Math.floor(s%3600/60)+'m':Math.floor(s/86400)+'d '+Math.floor(s%86400/3600)+'h'};
+const marketClosed=ms=>{const d=new Date(ms),w=d.getUTCDay(),h=d.getUTCHours();return w===6||(w===5&&h>=22)||(w===0&&h<22)};
+const errText=x=>({limit:'API limit reached',unavailable:'Not available',config:'Server not set up',network:'Network error'}[x.kind]||'Error');
+
+/* Browser cache. Only real provider candles are stored, with the time they were fetched. Entries older than 30 minutes are ignored. */
+const lsGet=k=>{try{return JSON.parse(localStorage.getItem(k))}catch(_){return null}},lsSet=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch(_){}};
+function persist(){const all=Object.values(C).filter(e=>e.all&&e.ts&&!(e.meta&&e.meta.cache==='stale')).sort((a,b)=>b.ts-a.ts);
+for(const n of [10,4,1]){const o={};all.slice(0,n).forEach(e=>{o[key(e.sy,e.t)]={ts:e.ts,all:e.all,meta:e.meta}});try{localStorage.setItem(LS,JSON.stringify(o));return}catch(_){}}}
+(function(){const o=lsGet(LS);if(o&&typeof o==='object')Object.keys(o).forEach(k=>{const v=o[k],[s,t]=k.split('|');
+if(S[s]&&IV[t]&&v&&Array.isArray(v.all)&&v.all.length>MINC&&Date.now()-v.ts<MAXAGE&&v.all.every(x=>x&&[x.time,x.open,x.high,x.low,x.close].every(Number.isFinite)))Object.assign(ent(s,t),{all:v.all,ts:v.ts,meta:v.meta||{fetched:v.ts},st:'ok'})});
+const l=lsGet(LSL);if(l>Date.now())limitUntil=l})();
+
+async function api(sy,t){let r,j;
+try{r=await fetch(MARKET_API+'?symbol='+encodeURIComponent(S[sy].p)+'&interval='+IV[t]+'&outputsize=300')}catch(_){throw er('network','Could not reach the market data server. Check your connection and try again.')}
+try{j=await r.json()}catch(_){j=null}
+if(!r.ok||!j||j.error){const x=j&&j.error;if(x)throw er(x.kind||'error',x.message||'Market data request failed.',x.retry_after);
+throw er(r.status===404?'config':'error',r.status===404?'The market-data function was not found. Deploy it to Supabase first (see SETUP.md).':'Market data request failed (HTTP '+r.status+').')}
+const c=(j.candles||[]).filter(x=>[x.time,x.open,x.high,x.low,x.close].every(Number.isFinite));
+if(c.length<MINC+1)throw er('unavailable','Twelve Data returned only '+c.length+' candles for '+S[sy].p+' '+t+'. At least '+(MINC+1)+' are needed for EMA 200 and the other indicators.');
+return{all:c,meta:{fetched:Date.parse(j.fetched_at)||Date.now(),cache:j.cache,warn:j.warning,exchange:j.exchange,credits:j.credits||null}}}
+
+/* One request per pair+timeframe at a time: concurrent callers share the same promise. */
+function load(sy,t,o){o=o||{};const e=ent(sy,t);if(e.p)return e.p;
+if(!o.force&&e.all&&Date.now()-e.ts<TTL[t]*1000)return Promise.resolve(e);
+if(o.force&&Date.now()-(e.try||0)<HOLD)return Promise.resolve(e);
+if(document.hidden)return Promise.reject(er('paused','Paused while the tab is hidden.'));
+if(Date.now()<limitUntil){e.err=er('limit','Requests are paused until the limit window resets, so no more credits are used.',Math.ceil((limitUntil-Date.now())/1000));e.st=e.all?'stale':'err';return Promise.reject(e.err)}
+e.try=Date.now();
+e.p=api(sy,t).then(r=>{e.all=r.all;e.meta=r.meta;e.ts=Date.now();e.err=null;e.st='ok';if(r.meta.credits)credits=r.meta.credits;persist();return e},x=>{e.err=x;e.st=e.all?'stale':'err';if(x.kind==='limit'){limitUntil=Date.now()+(x.retry||60)*1000;lsSet(LSL,limitUntil)}throw x}).finally(()=>{e.p=null});
+return e.p}
+
+const closedC=e=>{const a=e.all,l=a[a.length-1];return l.time*1000+MS[e.t]>Date.now()?a.slice(0,-1):a};
+function coreOf(e){if(!e.all)return null;if(e.cs!==e.ts){e.k=closedC(e);e.cx=e.k.length>=MINC?core(e.k):null;e.cs=e.ts}return e.cx}
+
+function analyze(sy,t){const e=C[key(sy,t)],x=e&&coreOf(e);if(!x)return null;const mt={},pend=[],bad=[];
+TF.forEach(f=>{if(f==t){mt[f]=x.trend;return}const o=C[key(sy,f)],y=o&&coreOf(o);if(y)mt[f]=y.trend;else{mt[f]=null;(o&&o.err&&!o.p?bad:pend).push(f)}});
+const d=x.trend,[e20,e50,e200]=x.E,B=d>0,Sl=d<0,mb=x.macd>x.sig&&x.macd>0,ms=x.macd<x.sig&&x.macd<0;
+const cond=d>0?[x.px>e200,e20>e50,x.rsi>50,mb,x.adx>20,x.st.s>0]:[x.px<e200,e20<e50,x.rsi<50,ms,x.adx>20,x.st.s<0];
+const ok=d!=0&&cond.every(Boolean);
+let sc=0;if(d){sc+=(cond[0]&&cond[1])?20:cond[0]||cond[1]?10:0;sc+=cond[2]?(x.rsi>(B?75:0)&&B||x.rsi<(Sl?25:0)&&Sl?10:15):0;sc+=cond[3]?15:(B?x.macd>x.sig:x.macd<x.sig)?8:0;sc+=x.adx>25?10:x.adx>20?6:0;sc+=cond[5]?20:0;sc+=Math.round(20*TF.filter(f=>mt[f]==d).length/TF.length)}
+const status=ok&&sc>=60?(B?'BUY':'SELL'):'WAIT';
+return{...x,k:e.k,all:e.all,mt,pend,bad,d,cond,sc,status,sy,t,ts:e.k[e.k.length-1].time}}
+
+/* Data freshness: LIVE, DELAYED, MARKET CLOSED, STALE or API LIMIT, decided from the real candle timestamps. */
+function fresh(e){if(!e||!e.all)return null;const last=e.all[e.all.length-1].time*1000,age=Date.now()-last;
+const prob=e.err?e.err:(e.meta&&e.meta.cache==='stale'?{kind:'stale',message:e.meta.warn||'The provider could not be reached.'}:null);
+if(prob)return{c:'bad',l:prob.kind==='limit'?'API LIMIT':'STALE',t:'Refresh failed: '+prob.message+' Showing the last real data received (latest candle '+utc(last)+').'};
+if(marketClosed(Date.now()))return{c:'dl',l:'MARKET CLOSED',t:'The forex market is closed for the weekend. Showing the last available candles; no new prices until it reopens (Sunday ~22:00 UTC).'};
+if(age<=MS[e.t]*1.5+9e4)return{c:'live',l:'LIVE',t:'Refreshed automatically every '+TTL[e.t]+' seconds while this tab is visible. Not tick-by-tick streaming.'};
+return{c:'dl',l:'DELAYED',t:'The latest candle is '+ago(age)+' old. The provider or your Twelve Data plan may be delaying this data.'}}
+
+function ov(h){const o=E('chMsg');o.innerHTML=h||'';o.classList.toggle('hid',!h)}
+const credTxt=()=>credits&&credits.left!=null?' · API credits left: <b>'+escH(credits.left)+'</b>':'';
+function paintMain(){const e=ent(sym,tf),k=key(sym,tf),d=S[sym].d;E('ct').textContent=S[sym].p+' · '+tf;const tg=E('dtag'),dts=E('dts'),dw=E('dw');
+if(e.all){ov('');if(!drawn||drawn.k!==k||drawn.ts!==e.ts){const pf={type:'price',precision:d,minMove:+(1/10**d).toFixed(d)},kc=coreOf(e)?e.k:closedC(e),cl=kc.map(x=>x.close);
+['c','a','b','d'].forEach(n=>ser[n].applyOptions({priceFormat:pf}));ser.c.setData(e.all);
+[['a',20],['b',50],['d',200]].forEach(([n,p])=>ser[n].setData(ema(cl,p).map((v,i)=>({time:kc[i].time,value:v}))));
+if(!drawn||drawn.k!==k)chart.timeScale().fitContent();drawn={k,ts:e.ts}}
+const fr=fresh(e);tg.className='tag '+fr.c;tg.textContent=fr.l;
+dts.innerHTML='Latest candle <b>'+utc(e.all[e.all.length-1].time*1000)+'</b> · data fetched <b>'+hms(e.meta.fetched)+'</b> (<span id="age">'+ago(Date.now()-e.meta.fetched)+'</span> ago)'+(e.p?' · <span class="sp"></span>refreshing':'')+' · Twelve Data'+credTxt()+' · times in UTC';
+dw.className='note'+(fr.c=='live'?'':fr.c=='dl'?' warn':' bear');dw.textContent=fr.t;return}
+if(drawn){['c','a','b','d'].forEach(n=>ser[n].setData([]));drawn=null}
+dts.innerHTML=credTxt().slice(3);dw.textContent='';
+if(e.err&&!e.p){const lim=e.err.kind==='limit';tg.className='tag bad';tg.textContent=lim?'API LIMIT':'UNAVAILABLE';
+ov('<b class="bear">'+errText(e.err)+'</b><span>'+escH(e.err.message)+'</span>'+(lim?'<span>You can request again in <b id="cd"></b>.'+credTxt().replace(' · ',' ')+'</span>':'')+'<button class="b p" id="ovb" onclick="retry()">Try again</button>')}
+else{tg.className='tag';tg.textContent=waitVis?'PAUSED':'LOADING';ov('<span>'+(waitVis?'Paused: no requests are sent while this tab is hidden.':'<span class="sp"></span>Loading '+S[sym].p+' '+tf+' from Twelve Data…')+'</span>')}}
+
+/* Returns [text, class, isError, canLoad]. Nothing is loaded until the user asks for it. */
+function trendCell(sy,f){const e=C[key(sy,f)],x=e&&coreOf(e);if(x)return[...tx(x.trend),false,false];if(e&&e.p)return['Loading…','neu',false,false];if(e&&e.err)return[errText(e.err),'bear',true,true];return['Not loaded','neu',false,true]}
+
+function paintSig(){const el=E('sig'),e=ent(sym,tf),a=analyze(sym,tf),nm=S[sym].p;
+if(!a){const bad=e.err&&!e.p;el.innerHTML='<div style="display:flex;justify-content:space-between;align-items:center"><b>'+nm+'</b><span class="st WAIT">'+(bad?'NO DATA':waitVis?'PAUSED':'LOADING')+'</span></div><p class="note">'+(bad?escH(e.err.message):'<span class="sp"></span>Waiting for market data…')+'</p><p class="note">No signal is shown without real data.</p>';return}
+const fr=fresh(e),px=a.all[a.all.length-1].close,hi=TF[Math.min(TF.indexOf(tf)+2,TF.length-1)],h=hi==tf?['n/a','neu']:trendCell(sym,hi),w=[],nl=TF.filter(x=>a.mt[x]!==null).length;
+if(a.status=='WAIT'){const names=['Price vs EMA 200','EMA 20/50','RSI','MACD','ADX above 20','Structure'];a.d?a.cond.forEach((c,i)=>{if(!c)w.push(names[i]+' not aligned')}):w.push('EMA 20/50 and EMA 200 disagree');if(a.d&&!w.length)w.push('Score '+a.sc+' is below 60')}
+const inv=a.status=='BUY'?'Close below EMA 50 ('+f(a.E[1])+'), MACD crossing bearish, or a break of the last swing low ('+(a.st.sr[1]?f(a.st.sr[1]):'n/a')+').':a.status=='SELL'?'Close above EMA 50 ('+f(a.E[1])+'), MACD crossing bullish, or a break of the last swing high ('+(a.st.sr[0]?f(a.st.sr[0]):'n/a')+').':'Nothing to invalidate. Wait for the indicators to agree.';
+const mc=a.macd>a.sig?'Bullish':'Bearish',badge='<span class="st '+a.status+'">'+(a.status=='WAIT'?'NO TRADE':a.status+' SETUP')+'</span>';
+el.innerHTML=`<div style="display:flex;justify-content:space-between;align-items:center"><b>${nm}</b>${badge}</div>
+<div style="font-size:28px;font-weight:700;margin:8px 0">${f(px)}</div>
+<div class="bar"><i style="width:${a.sc}%"></i></div><p class="note" style="margin:6px 0 0"><b>${a.sc}/100</b> · ${lv(a.sc)}. Technical confirmation, not a win probability.</p>
+<div class="kv"><span>Timeframe</span><span>${tf}</span><span>Higher timeframe (${hi})</span><span class="${h[1]}">${h[0]}</span><span>RSI 14</span><span>${a.rsi.toFixed(1)}</span><span>MACD 12,26,9</span><span class="${mc=='Bullish'?'bull':'bear'}">${mc}</span><span>EMA 20 / 50 / 200</span><span class="${tx(a.trend)[1]}">${tx(a.trend)[0]}</span><span>ADX 14</span><span>${a.adx.toFixed(1)}</span><span>ATR 14</span><span>${f(a.atr)}</span><span>Structure</span><span class="${tx(a.st.s)[1]}">${tx(a.st.s)[0]}</span><span>Candle closed</span><span>${new Date(a.ts*1000).toUTCString().slice(5,22)} UTC</span></div>
+<p class="note"><b>Data:</b> <span class="${fr.c=='live'?'bull':fr.c=='dl'?'warn':'bear'}">${fr.l}</span>. Price shown is the latest candle close from Twelve Data; indicators use completed candles only.</p>
+<p class="note"><b>Multi-timeframe:</b> ${nl} of ${TF.length} timeframes loaded.${nl<TF.length?' Only loaded timeframes count toward the score. Load more in the trend table to add confirmation.':''}</p>
+<p class="note"><b>Why:</b> ${a.status=='WAIT'?'No trade. '+w.join('; ')+'.':'All six conditions agree on the '+(a.status=='BUY'?'bullish':'bearish')+' side.'}</p><p class="note"><b>Invalidated if:</b> ${inv}</p>`}
+
+function paintMtf(){E('wf').textContent=(sym=='XAUUSD'?'XAU/USD workflow: H1 overall trend, M15 trend confirmation, M5 setup, M1 entry confirmation. ':'Each timeframe shows its own trend from EMA 20/50/200. ')+'Other timeframes load only when you ask, to save API requests.';
+const rows=TF.map(x=>{const r=trendCell(sym,x),role=sym=='XAUUSD'?{H1:'Overall trend',M15:'Confirmation',M5:'Setup',M1:'Entry'}[x]||'':'';
+return`<tr><td>${x}</td><td class="${r[1]}">${r[0]}${r[3]?` <button class="t" onclick="loadTf('${x}')">${r[2]?'Retry':'Load'}</button>`:''}</td><td>${role}</td></tr>`}).join('');
+const miss=TF.filter(x=>{const o=C[key(sym,x)];return!(o&&(o.all||o.p))}).length;
+E('mtf').innerHTML='<tr><th>TF</th><th>Trend</th><th>Role</th></tr>'+rows+(miss>1?`<tr><td colspan="3"><button class="t" onclick="loadAll()"${loadingAll?' disabled':''}>Load all missing timeframes (${miss} requests)</button></td></tr>`:'')}
+
+function paintWl(){E('wl').innerHTML='<tr><th>Symbol</th><th>Price</th><th>Signal</th><th>Score</th></tr>'+Object.keys(S).map(s=>{const e=C[key(s,'M15')],nm=S[s].p,b=`<button class="t ${s==sym?'on':''}" onclick="pick('${s}')" title="Select ${nm} to load it">${nm}</button>`;
+if(!e||!e.all){const bad=e&&e.err&&!e.p;return`<tr><td>${b}</td><td colspan="3" class="${bad?'bear':'note'}">${bad?errText(e.err):e&&e.p?'Loading…':'Not loaded'}</td></tr>`}
+const a=s===sym?analyze(s,'M15'):null;let sg='<span class="note">–</span>',sc='–';if(a){sg=`<span class="st ${a.status}">${a.status=='WAIT'?'NO TRADE':a.status}</span>`;sc=a.sc}
+return`<tr><td>${b}</td><td>${f(e.all[e.all.length-1].close,s)}</td><td>${sg}</td><td>${sc}</td></tr>`}).join('')}
+
+/* Refresh button and limit countdown, updated every second without any network use. */
+function paintCtl(){const e=ent(sym,tf),b=E('rf'),w=limitUntil-Date.now();
+b.disabled=!!e.p||document.hidden||w>0||Date.now()-(e.try||0)<HOLD;
+b.title=w>0?'API limit active. You can request again in '+ago(w)+'.':e.p?'Loading…':'Fetch the latest candles now';
+const c=E('cd');if(c)c.textContent=w>0?ago(w):'now';const ob=E('ovb');if(ob)ob.disabled=w>0}
+
+function paintAll(){paintMain();paintSig();paintMtf();paintWl();paintCtl()}
+function render(force){const my=++gen;paintAll();
+if(document.hidden){waitVis=true;paintAll();return}waitVis=false;
+load(sym,tf,{force:force===true}).catch(()=>{}).then(()=>{if(my===gen)paintAll()})}
+function loadTf(t){if(document.hidden)return;const s=sym,p=load(s,t);paintAll();p.catch(()=>{}).then(paintAll)}
+async function loadAll(){if(loadingAll||document.hidden)return;loadingAll=true;const s=sym;
+for(const t of TF){const o=C[key(s,t)];if(o&&(o.all||o.p))continue;if(s!==sym||document.hidden||Date.now()<limitUntil)break;const p=load(s,t);paintAll();await p.catch(()=>{});paintAll()}
+loadingAll=false;paintAll()}
+function retry(){if(Date.now()<limitUntil){paintAll();return}Object.values(C).forEach(e=>{if(e.err&&!e.p)e.err=null});render(true)}
+function manualRefresh(){if(document.hidden||Date.now()<limitUntil||ent(sym,tf).p)return;render(true)}
+function pick(s){sym=s;tabs();render()}
+function tabs(){E('syms').innerHTML=Object.keys(S).map(s=>`<button class="t ${s==sym?'on':''}" onclick="sym='${s}';tabs();render()">${S[s].p}</button>`).join('');
+E('tfs').innerHTML=TF.map(s=>`<button class="t ${s==tf?'on':''}" onclick="tf='${s}';tabs();render()">${s}</button>`).join('')}
+
+/* Auto refresh of the open chart only, never while the tab is hidden or during an API limit window. */
+function tick(){if(document.hidden||Date.now()<limitUntil)return;const e=ent(sym,tf);if(e.p||!e.all)return;if(Date.now()-Math.max(e.ts||0,e.try||0)>=TTL[tf]*1000)render()}
+setInterval(tick,5000);
+document.addEventListener('visibilitychange',()=>{if(document.hidden){paintCtl();return}if(waitVis)render();else tick()});
+setInterval(()=>{const e=ent(sym,tf),a=E('age');if(a&&e.meta)a.textContent=ago(Date.now()-e.meta.fetched);paintCtl()},1000);
+initChart();tabs();bill(0);risk();render();
+</script>
+<script>
+/* ===== Auto Trading Bot dashboard. PAPER TRADING ONLY: there is no broker code on this page or on the server.
+   Reads: the signed-in user's own rows (protected by row-level security) through the existing Supabase client.
+   Writes: ONLY through the "bot-control" Edge Function, which re-validates everything on the server.
+   No API key, service key or provider key exists in this file (the publishable key is the same one the page already uses). ===== */
+const TMBot=(()=>{
+const BOT_API=SUPABASE_URL+'/functions/v1/bot-control',$=id=>document.getElementById(id);
+const FIELDS=[['Simulation risk limits',[
+ ['risk_per_trade_pct','Risk per trade (%)',.1,5,.1,0,'Equity risked on each simulated trade'],
+ ['max_open_positions','Max open positions',1,10,1,1,'Across all markets'],
+ ['max_daily_loss_pct','Daily loss limit (%)',.5,20,.5,0,'Halts the bot and closes everything until 00:00 UTC'],
+ ['max_drawdown_pct','Max drawdown (%)',1,50,1,0,'Fall from peak equity that halts the bot'],
+ ['max_trades_per_day','Max trades per day',1,100,1,1,''],
+ ['cooldown_minutes','Cooldown per market (min)',0,1440,5,1,'Pause after a trade closes']]],
+ ['Strategy',[
+ ['min_score','Minimum score',60,100,1,1,'Setups below this are ignored'],
+ ['rr_ratio','Reward : risk',.5,10,.1,0,'Target distance = stop distance × this'],
+ ['sl_atr_mult','Stop distance (× ATR)',.5,5,.1,0,''],
+ ['slippage_bps','Simulated slippage (bps)',0,50,.5,0,'Adverse price move on entry']]]];
+const FLAGS=[['close_on_opposite','Close a position on a strong opposite signal'],['require_htf','Require higher-timeframe agreement']];
+const RULE={};FIELDS.forEach(g=>g[1].forEach(f=>RULE[f[0]]=f));
+const EXIT={tp:'Take profit',sl:'Stop loss',manual:'Closed manually',emergency:'Emergency stop',risk_limit:'Risk limit',signal_reverse:'Opposite signal'};
+const HALT={emergency_stop:'Emergency stop was used.',daily_loss_limit:'The daily loss limit was reached. All simulated positions were closed.',max_drawdown:'The max drawdown limit was reached. All simulated positions were closed.',plan_limit:'Your current plan does not include these markets or this timeframe.'};
+const STALE_RUN_MS=150000,POLL_MS=15000;
+
+let uid=null,st=null,acct=null,pos=[],closed=[],acts=[],limits=null,plan='free',draft={symbols:[],timeframe:'M15'},dirty=false,
+    failed=null,chan=null,rt=false,pollT=null,tickT=null,inflight=null,again=false,pend=0,histN=25,marks={},lastWarn=0,linkErr=false,built=false;
+
+/* ---------- helpers ---------- */
+const n=v=>Number(v),fin=v=>Number.isFinite(n(v));
+const money=(v,sign)=>{v=Math.round(n(v)*100)/100;if(!Number.isFinite(v))return'–';return(v<0?'-':sign&&v>0?'+':'')+'$'+Math.abs(v).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})};
+const cls=v=>n(v)>0?'bull':n(v)<0?'bear':'';
+const dp=s=>(S[s]||{d:5}).d,px=(s,v)=>v==null||!fin(v)?'–':n(v).toFixed(dp(s)),nm=s=>(S[s]||{p:s}).p;
+const utcs=iso=>iso?new Date(iso).toISOString().slice(5,19).replace('T',' '):'–';
+const agoIso=iso=>iso?ago(Date.now()-Date.parse(iso)):'–';
+const todayUtc=()=>new Date().toISOString().slice(0,10);
+const same=(a,b)=>JSON.stringify([...a].sort())===JSON.stringify([...b].sort());
+const say=(id,t,good)=>{const e=$(id);e.textContent=t||'';e.className='err'+(good?' ok':'')};
+const toast=m=>TM.toast(m);
+const running=()=>!!st&&st.status==='running';
+const locked=()=>running()||pos.length>0;
+
+/* ---------- server API (user's JWT; the server validates everything again) ---------- */
+async function call(action,extra){
+  const sb=TM.client(),{data}=sb?await sb.auth.getSession():{},tok=data&&data.session&&data.session.access_token;
+  if(!tok)throw Object.assign(new Error('Please log in.'),{status:401});
+  let r,j=null;
+  try{r=await fetch(BOT_API,{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+tok,'apikey':SUPABASE_PUBLISHABLE_KEY},body:JSON.stringify(Object.assign({action},extra||{}))})}
+  catch(_){throw Object.assign(new Error('Could not reach the bot service. Check your connection and try again.'),{status:0})}
+  try{j=await r.json()}catch(_){}
+  if(!r.ok||!j||j.error){
+    const m=j&&j.error&&j.error.message;
+    throw Object.assign(new Error(m||(r.status===404?'The bot service is not deployed yet.':'The bot service returned an error (HTTP '+r.status+').')),{status:r.status})}
+  return j}
+function onErr(e,target){
+  if(e&&e.status===401){const sb=TM.client();if(sb)sb.auth.signOut({scope:'local'});return}
+  const m=(e&&e.message)||'Something went wrong.';if(target)say(target,m);else toast(m)}
+
+/* ---------- data ---------- */
+const q=p=>p.then(r=>{if(r.error)throw r.error;return r.data});
+async function loadAll(){
+  const sb=TM.client(),me=uid;
+  const [s,a,o,c,l]=await Promise.all([
+    q(sb.from('bot_settings').select('*').eq('user_id',me).maybeSingle()),
+    q(sb.from('paper_accounts').select('*').eq('user_id',me).maybeSingle()),
+    q(sb.from('paper_positions').select('*').eq('user_id',me).eq('status','open').order('opened_at',{ascending:false})),
+    q(sb.from('paper_positions').select('*').eq('user_id',me).eq('status','closed').order('closed_at',{ascending:false}).limit(200)),
+    q(sb.from('bot_activity').select('id,ts,level,kind,symbol,message').eq('user_id',me).order('ts',{ascending:false}).order('id',{ascending:false}).limit(100))]);
+  if(me!==uid)return;                                   // user changed while loading
+  pos.forEach(p=>marks[p.id]=n(p.mark_price));
+  if(s)st=s;if(a)acct=a;pos=o||[];closed=c||[];acts=l||[];}
+function refresh(){
+  if(!uid)return Promise.resolve();
+  if(inflight){again=true;return inflight}
+  inflight=loadAll().then(()=>{linkErr=false;render()},e=>{linkErr=true;paintLink();
+    if(Date.now()-lastWarn>60000){lastWarn=Date.now();toast('Live bot data is temporarily unavailable. Retrying.')}})
+   .finally(()=>{inflight=null;if(again){again=false;setTimeout(refresh,300)}});
+  return inflight}
+let deb=0;const soon=()=>{clearTimeout(deb);deb=setTimeout(refresh,400)};
+
+/* ---------- lifecycle ---------- */
+function fatal(msg,hint){
+  $('btIn').classList.add('hid');$('btOut').classList.add('hid');const f=$('btFatal');f.classList.remove('hid');
+  f.innerHTML='<b class="bear">Auto Bot is unavailable</b><p>'+escH(msg)+'</p>'+(hint?'<p class="note">'+escH(hint)+'</p>':'')+'<button class="b" id="btRetry" type="button">Try again</button>';
+  $('btRetry').onclick=()=>{const u=TM.user();stopAll();failed=null;if(u)begin(u)}}
+async function begin(u){
+  uid=u.id;$('btOut').classList.add('hid');$('btFatal').classList.add('hid');$('btIn').classList.remove('hid');
+  if(!built)build();
+  $('btPill').textContent='LOADING';
+  try{
+    const r=await call('init');
+    if(uid!==u.id)return;
+    if(!r.settings||!r.account)throw Object.assign(new Error('The bot tables are not set up.'),{status:500});
+    st=r.settings;acct=r.account;limits=r.limits;plan=r.plan;
+    await loadAll();
+  }catch(e){
+    if(uid!==u.id)return;
+    if(e&&e.status===401){onErr(e);return}
+    const code=e&&e.code,tbl=code==='PGRST205'||code==='42P01';
+    uid=null;failed=u.id;
+    fatal(e.status===404?'The bot-control function was not found on your Supabase project.':tbl?'The bot database tables were not found.':(e.message||'The bot service could not be loaded.'),
+      e.status===404||tbl||e.status===500?'The site owner needs to finish the Auto Bot setup (database migration and Edge Functions). See SETUP.md.':'');
+    return}
+  draft={symbols:[...st.symbols],timeframe:st.timeframe};dirty=false;
+  render();subscribe();
+  clearInterval(pollT);pollT=setInterval(()=>{if(!document.hidden&&uid)refresh()},POLL_MS);
+  clearInterval(tickT);tickT=setInterval(tick,1000)}
+function stopAll(){
+  clearInterval(pollT);clearInterval(tickT);clearTimeout(deb);
+  if(chan){try{TM.client().removeChannel(chan)}catch(_){}chan=null}
+  uid=null;st=acct=null;pos=[];closed=[];acts=[];marks={};dirty=false;rt=false;linkErr=false;inflight=null;again=false;
+  say('btMsg','');say('btCfgErr','');
+  $('btIn').classList.add('hid');$('btFatal').classList.add('hid');$('btOut').classList.remove('hid')}
+function sync(){
+  const u=TM.user();
+  if(!u){failed=null;if(uid||!$('btFatal').classList.contains('hid'))stopAll();return}
+  if(uid!==u.id&&failed!==u.id){if(uid)stopAll();begin(u)}}
+function subscribe(){
+  const sb=TM.client();if(!sb||!sb.channel)return;
+  try{
+    chan=sb.channel('bot-'+uid);
+    ['bot_settings','paper_accounts','paper_positions','bot_activity'].forEach(t=>chan.on('postgres_changes',{event:'*',schema:'public',table:t,filter:'user_id=eq.'+uid},soon));
+    chan.subscribe(s=>{rt=s==='SUBSCRIBED';paintLink()})
+  }catch(_){rt=false}}
+document.addEventListener('visibilitychange',()=>{if(!document.hidden&&uid)refresh()});
+
+/* ---------- actions ---------- */
+function busy(b,on,t){if(on){b.dataset.t=b.textContent;b.innerHTML='<span class="sp"></span>'+(t||'Please wait');b.classList.add('bt-busy');b.disabled=true}else{b.textContent=b.dataset.t||b.textContent;b.classList.remove('bt-busy');b.disabled=false}}
+async function act(btn,action,extra,ok,label){
+  if(pend)return;pend=1;say('btMsg','');busy(btn,true,label);let r=null;
+  try{r=await call(action,extra);if(ok)toast(typeof ok==='function'?ok(r):ok);await refresh()}
+  catch(e){onErr(e,'btMsg')}
+  finally{pend=0;busy(btn,false);paintHead()}
+  return r}
+$('btStart').onclick=()=>{if(dirty&&!confirm('You have unsaved settings. Start the bot with the saved settings?'))return;act($('btStart'),'start',null,'Bot started. Analysis now runs on the server.','Starting')};
+$('btStop').onclick=()=>act($('btStop'),'stop',null,'Bot stopped. Open positions are still managed until they close.','Stopping');
+$('btEmg').onclick=()=>{if(!confirm('EMERGENCY STOP\n\nThis closes every simulated position at the last known price and halts the bot. Continue?'))return;act($('btEmg'),'emergency_stop',null,r=>'Emergency stop: '+r.closed+' simulated position(s) closed.','Stopping')};
+$('btReset').onclick=()=>{const v=n($('btBal').value);if(!(v>=100&&v<=1e7))return say('btMsg','Starting balance must be between 100 and 10,000,000.');
+  if(!confirm('Reset the paper account to $'+v.toLocaleString()+'? All simulated positions and trade history will be deleted.'))return;
+  act($('btReset'),'reset_account',{starting_balance:v,confirm:true},'Paper account reset.','Resetting')};
+$('btIn').addEventListener('click',e=>{
+  const c=e.target.closest('[data-close]');
+  if(c){if(!confirm('Close this simulated position at the last known price?'))return;act(c,'close_position',{position_id:c.dataset.close},'Simulated position closed.','Closing');return}
+  if(e.target.id==='btMore'){histN+=25;paintHist()}});
+
+/* ---------- settings form ---------- */
+function build(){
+  $('btFields').innerHTML=FIELDS.map(g=>`<div class="bt-grp">${g[0]}</div><div class="grid jf">${g[1].map(f=>`<div><label for="btf_${f[0]}">${escH(f[1])}</label><input id="btf_${f[0]}" type="number" inputmode="decimal" min="${f[2]}" max="${f[3]}" step="${f[4]}">${f[6]?`<span class="bt-h">${escH(f[6])}</span>`:''}</div>`).join('')}</div>`).join('')+
+    FLAGS.map(f=>`<label class="bt-chk" for="btf_${f[0]}"><input id="btf_${f[0]}" type="checkbox">${escH(f[1])}</label>`).join('');
+  $('btForm').addEventListener('input',()=>{dirty=true;$('btDiscard').classList.remove('hid')});
+  $('btForm').addEventListener('submit',saveCfg);
+  $('btDiscard').onclick=()=>{dirty=false;draft={symbols:[...st.symbols],timeframe:st.timeframe};say('btCfgErr','');paintForm()};
+  $('btSyms').addEventListener('click',e=>{const b=e.target.closest('[data-sym]');if(!b||b.disabled)return;
+    const s=b.dataset.sym,has=draft.symbols.includes(s),next=Object.keys(S).filter(x=>x===s?!has:draft.symbols.includes(x));
+    if(!next.length)return say('btCfgErr','Select at least one market.');
+    if(!has&&next.length>limits.maxSymbols)return say('btCfgErr','Your '+plan+' plan allows up to '+limits.maxSymbols+' market'+(limits.maxSymbols>1?'s':'')+' for the bot.');
+    say('btCfgErr','');draft.symbols=next;dirty=true;$('btDiscard').classList.remove('hid');paintChips()});
+  $('btTfs').addEventListener('click',e=>{const b=e.target.closest('[data-tf]');if(!b||b.disabled)return;say('btCfgErr','');draft.timeframe=b.dataset.tf;dirty=true;$('btDiscard').classList.remove('hid');paintChips()});
+  built=true}
+function paintChips(){
+  const lk=locked();
+  $('btSyms').innerHTML=Object.keys(S).map(s=>`<button type="button" class="t" data-sym="${s}" aria-pressed="${draft.symbols.includes(s)}"${lk?' disabled':''}>${escH(S[s].p)}</button>`).join('');
+  $('btTfs').innerHTML=TF.map(t=>{const ok=!limits||limits.timeframes.includes(t);return`<button type="button" class="t" data-tf="${t}" aria-pressed="${draft.timeframe===t}"${lk||!ok?' disabled':''}${!ok?` title="Not included in your ${escH(plan)} plan"`:''}>${t}</button>`}).join('');
+  $('btLockNote').textContent=lk?(running()?'Stop the bot to change markets or timeframe.':'Close or finish your open positions to change markets or timeframe.'):''}
+function paintForm(){
+  if(!dirty&&st)draft={symbols:[...st.symbols],timeframe:st.timeframe};
+  paintChips();if(dirty||!st)return;
+  FIELDS.forEach(g=>g[1].forEach(f=>$('btf_'+f[0]).value=n(st[f[0]])));
+  FLAGS.forEach(f=>$('btf_'+f[0]).checked=!!st[f[0]]);
+  if(document.activeElement!==$('btBal'))$('btBal').value=n(acct.starting_balance);
+  $('btDiscard').classList.add('hid')}
+async function saveCfg(ev){
+  ev.preventDefault();if(pend)return;say('btCfgErr','');const cfg={};
+  for(const k in RULE){const f=RULE[k],raw=$('btf_'+k).value.trim(),v=Number(raw);
+    if(raw===''||!Number.isFinite(v)||v<f[2]||v>f[3]||(f[5]&&!Number.isInteger(v)))return say('btCfgErr',f[1]+' must be '+(f[5]?'a whole number ':'a number ')+'between '+f[2]+' and '+f[3]+'.');
+    cfg[k]=f[5]?v:Math.round(v*100)/100}
+  FLAGS.forEach(f=>cfg[f[0]]=$('btf_'+f[0]).checked);
+  if(!same(draft.symbols,st.symbols))cfg.symbols=draft.symbols;
+  if(draft.timeframe!==st.timeframe)cfg.timeframe=draft.timeframe;
+  const b=$('btSave');pend=1;busy(b,true,'Saving');
+  try{await call('save_config',{config:cfg});dirty=false;toast('Settings saved.');await refresh()}
+  catch(e){onErr(e,'btCfgErr')}
+  finally{pend=0;busy(b,false);paintHead()}}
+
+/* ---------- rendering ---------- */
+function render(){paintHead();paintStats();paintEquity();paintAnalysis();paintForm();paintPos();paintHist();paintLog()}
+function paintLink(){
+  const t=$('btLink');if(!t)return;
+  t.className='tag '+(linkErr?'bad':rt?'live':'dl');
+  t.textContent=linkErr?'RECONNECTING':rt?'LIVE UPDATES':'UPDATING EVERY '+POLL_MS/1000+'s'}
+function paintHead(){
+  if(!st)return;
+  const r=st.status,p=$('btPill'),since=st.last_run_at?Date.now()-Date.parse(st.last_run_at):null;
+  p.className='tag bt-pill '+(r==='running'?'live':r==='halted'?'bad':'');
+  p.textContent=r==='running'?'RUNNING':r==='halted'?'HALTED':'STOPPED';
+  const lr=$('btRun');
+  lr.className='note'+(r==='running'&&(since==null||since>STALE_RUN_MS)?' warn':'');
+  lr.textContent=!st.last_run_at?(r==='running'?'Waiting for the first background analysis (up to a minute)…':'No analysis yet.')
+    :'Last server analysis '+ago(since)+' ago'+(r==='running'&&since>STALE_RUN_MS?' · the background worker looks delayed':'');
+  const h=$('btHalt');h.className='note'+(r==='halted'?' bear':'');
+  h.textContent=r==='halted'?'Halted: '+(HALT[st.halt_reason]||st.halt_reason||'stopped by a safety rule')+' Start the bot again when you are ready.':
+    r==='stopped'&&pos.length?'The bot is stopped (no new entries). Your '+pos.length+' open simulated position'+(pos.length>1?'s are':' is')+' still managed until a stop or target is hit.':'';
+  const lim=limits||{maxSymbols:2,timeframes:[]};
+  $('btPlan').textContent='Plan: '+({free:'Free',starter:'Starter',pro:'Pro',premium:'Premium'}[plan]||plan)+' · up to '+lim.maxSymbols+' market'+(lim.maxSymbols>1?'s':'')+' · timeframes '+lim.timeframes.join(', ')+'.';
+  const lock=!!pend;
+  $('btStart').disabled=lock||r==='running';$('btStop').disabled=lock||r!=='running';$('btEmg').disabled=lock||(r!=='running'&&!pos.length);
+  paintLink()}
+function tile(k,v,sub){return`<div class="card"><span class="bt-k">${k}</span><div class="bt-v">${v}</div>${sub?`<span class="note">${sub}</span>`:''}</div>`}
+function paintStats(){
+  if(!acct)return;
+  const sb=n(acct.starting_balance),eq=n(acct.equity),bal=n(acct.balance),isToday=acct.day_key===todayUtc(),day=isToday?eq-n(acct.day_start_equity):0,tot=eq-sb,
+    open=pos.reduce((a,p)=>a+n(p.unrealized_pnl),0),w=closed.filter(t=>n(t.pnl)>0),l=closed.filter(t=>n(t.pnl)<0),
+    gw=w.reduce((a,t)=>a+n(t.pnl),0),gl=-l.reduce((a,t)=>a+n(t.pnl),0),pf=gl>0?(gw/gl).toFixed(2):gw>0?'∞':'–',
+    wr=closed.length?Math.round(100*w.length/closed.length)+'%':'–',pc=v=>(v>=0?'+':'')+(v/sb*100).toFixed(2)+'%';
+  $('btStats').innerHTML=tile('Equity',money(eq),'Start '+money(sb))+tile('Balance (realised)',money(bal))+
+    tile('Today (UTC)',`<span class="${cls(day)}">${money(day,1)}</span>`,pc(day))+tile('Total P&amp;L',`<span class="${cls(tot)}">${money(tot,1)}</span>`,pc(tot))+
+    tile('Open P&amp;L',`<span class="${cls(open)}">${money(open,1)}</span>`,pos.length+' open')+tile('Win rate',wr,closed.length+' closed trade'+(closed.length===1?'':'s')+(closed.length>=200?' (last 200)':''))+
+    tile('Profit factor',pf,'Gross win ÷ gross loss')+tile('Wins / losses',w.length+' / '+l.length);
+  if(!st)return;
+  const dl=isToday&&n(acct.day_start_equity)>0?Math.max(0,(n(acct.day_start_equity)-eq)/n(acct.day_start_equity)*100):0,
+    dd=n(acct.peak_equity)>0?Math.max(0,(n(acct.peak_equity)-eq)/n(acct.peak_equity)*100):0,
+    m=(t,u,lim)=>{const f=lim>0?Math.min(1,u/lim):0;return`<div class="card"><div class="bt-sep"><b>${t}</b><span class="note">limit ${lim}%</span></div><div class="bar"><i style="width:${(f*100).toFixed(1)}%;background:${f>.85?'var(--r)':f>.6?'#f59e0b':'var(--p)'}"></i></div><span class="note">${u.toFixed(2)}% used (${Math.round(f*100)}% of the limit)</span></div>`};
+  $('btMeters').innerHTML=m('Daily loss',dl,n(st.max_daily_loss_pct))+m('Drawdown from peak',dd,n(st.max_drawdown_pct))}
+function paintEquity(){
+  const el=$('btEq');if(!acct)return;
+  const asc=closed.slice().reverse();let v=n(acct.balance)-asc.reduce((a,t)=>a+n(t.pnl),0);const pts=[v];asc.forEach(t=>{v+=n(t.pnl);pts.push(v)});
+  if(pts.length<2){el.innerHTML='<p class="note" style="margin:14px 0 6px">No closed trades yet. The curve appears after the first simulated trade closes.</p>';return}
+  const W=600,H=170,mn=Math.min(...pts),mx=Math.max(...pts),rg=(mx-mn)||Math.max(1,Math.abs(mx)*.01),lo=mn-rg*.12,hi=mx+rg*.12,
+    X=i=>i*W/(pts.length-1),Y=y=>H-(y-lo)/(hi-lo)*H,d=pts.map((p,i)=>(i?'L':'M')+X(i).toFixed(1)+' '+Y(p).toFixed(1)).join(' '),
+    up=pts[pts.length-1]>=pts[0],c=up?'var(--g)':'var(--r)',by=Y(pts[0]).toFixed(1);
+  el.innerHTML=`<svg class="bt-eq" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" role="img" aria-label="Realised balance over ${pts.length-1} closed trades, from ${money(pts[0])} to ${money(pts[pts.length-1])}"><defs><linearGradient id="btgr" x1="0" y1="0" x2="0" y2="1"><stop offset="0" style="stop-color:${c};stop-opacity:.3"/><stop offset="1" style="stop-color:${c};stop-opacity:0"/></linearGradient></defs><path d="${d} L${W} ${H} L0 ${H} Z" fill="url(#btgr)"/><line x1="0" x2="${W}" y1="${by}" y2="${by}" style="stroke:var(--mu)" stroke-dasharray="4 4" vector-effect="non-scaling-stroke" opacity=".6"/><path d="${d}" fill="none" style="stroke:${c}" stroke-width="2" stroke-linejoin="round" vector-effect="non-scaling-stroke"/></svg><p class="note" style="margin:6px 0 0">Low ${money(mn)} · High ${money(mx)} · ${pts.length-1} trade${pts.length>2?'s':''} · dashed line = starting level</p>`}
+function dataTag(s){const m={LIVE:['live','LIVE'],DELAYED:['dl','DELAYED'],MARKET_CLOSED:['dl','MARKET CLOSED'],STALE:['bad','STALE'],ERROR:['bad','ERROR'],WAITING:['','WAITING']}[s]||['',String(s||'').replace(/_/g,' ')];return`<span class="tag ${m[0]}">${escH(m[1])}</span>`}
+function paintAnalysis(){
+  if(!st)return;const la=st.last_analysis||{},rows=st.symbols.map(s=>{const a=la[s];
+    if(!a)return`<tr><td>${escH(nm(s))}</td><td colspan="7" class="note">${running()?'Waiting for the next analysis cycle…':'Start the bot to begin analysis.'}</td></tr>`;
+    const b=a.status==='BUY'||a.status==='SELL'?`<span class="st ${a.status}">${a.status}</span>`:a.status==='WAIT'?'<span class="st WAIT">NO TRADE</span>':'<span class="st WAIT">NO DATA</span>',
+      t=a.trend==null?['–','neu']:tx(a.trend),ok=a.score!=null&&a.score>=n(st.min_score);
+    return`<tr><td>${escH(nm(s))}${a.note?`<br><small title="${escH(a.note)}">${escH(String(a.note).slice(0,42))}</small>`:''}</td><td>${b}</td><td>${a.score==null?'–':`<b class="${ok?'bull':''}">${a.score}</b>`}</td><td>${px(s,a.price)}</td><td class="${t[1]}">${t[0]}</td><td>${a.rsi??'–'}</td><td>${a.adx??'–'}</td><td>${dataTag(a.data)}</td></tr>`}).join('');
+  $('btAn').innerHTML=`<tr><th>Market</th><th>Signal</th><th>Score <small>(min ${n(st.min_score)})</small></th><th>Price</th><th>Trend</th><th>RSI</th><th>ADX</th><th>Data</th></tr>`+rows;
+  $('btAnTs').innerHTML=st.timeframe+' · '+(st.last_run_at?'updated <span data-age="'+escH(st.last_run_at)+'">'+agoIso(st.last_run_at)+'</span> ago':'no analysis yet')}
+function paintPos(){
+  const el=$('btPos');
+  $('btPosTs').textContent=pos.length?'Marked to market by the server every minute':'';
+  if(!pos.length){el.innerHTML='<p class="note">No open simulated positions.'+(running()?' The bot opens one when a setup scores at or above your minimum.':'')+'</p>';return}
+  const tot=pos.reduce((a,p)=>a+n(p.unrealized_pnl),0);
+  el.innerHTML='<table class="bt-tb"><tr><th>Market</th><th>Side</th><th>Size</th><th>Entry</th><th>Mark</th><th>Stop</th><th>Target</th><th>Open P&amp;L</th><th>Risk</th><th>Score</th><th>Opened (UTC)</th><th></th></tr>'+
+  pos.map(p=>{const old=marks[p.id],now=n(p.mark_price),fl=old&&now&&old!==now?(((now-old)*(p.side==='buy'?1:-1))>0?' bt-fl-up':' bt-fl-dn'):'';
+    return`<tr><td>${escH(nm(p.symbol))}</td><td class="${p.side==='buy'?'bull':'bear'}">${escH(p.side.toUpperCase())}</td><td>${n(p.qty).toLocaleString(undefined,{maximumFractionDigits:2})}</td><td>${px(p.symbol,p.entry_price)}</td><td class="${fl.trim()}">${px(p.symbol,p.mark_price)}</td><td>${px(p.symbol,p.sl)}</td><td>${px(p.symbol,p.tp)}</td><td class="${cls(p.unrealized_pnl)}${fl}">${money(p.unrealized_pnl,1)}</td><td>${money(p.risk_amount)}</td><td>${p.score??'–'}</td><td>${utcs(p.opened_at)}</td><td><button class="t" type="button" data-close="${escH(p.id)}">Close</button></td></tr>`}).join('')+
+  `<tr><td colspan="7"><b>Total</b></td><td class="${cls(tot)}"><b>${money(tot,1)}</b></td><td colspan="4"></td></tr></table>`}
+function paintHist(){
+  const el=$('btHist');
+  if(!closed.length){el.innerHTML='<p class="note">No closed simulated trades yet.</p>';return}
+  const dur=t=>ago(Date.parse(t.closed_at)-Date.parse(t.opened_at));
+  el.innerHTML='<table class="bt-tb"><tr><th>Closed (UTC)</th><th>Market</th><th>Side</th><th>Size</th><th>Entry</th><th>Exit</th><th>P&amp;L</th><th>R</th><th>Result</th><th>Held</th></tr>'+
+  closed.slice(0,histN).map(t=>`<tr><td>${utcs(t.closed_at)}</td><td>${escH(nm(t.symbol))}</td><td class="${t.side==='buy'?'bull':'bear'}">${escH(t.side.toUpperCase())}</td><td>${n(t.qty).toLocaleString(undefined,{maximumFractionDigits:2})}</td><td>${px(t.symbol,t.entry_price)}</td><td>${px(t.symbol,t.exit_price)}</td><td class="${cls(t.pnl)}">${money(t.pnl,1)}</td><td class="${cls(t.r_multiple)}">${t.r_multiple==null?'–':(n(t.r_multiple)>0?'+':'')+n(t.r_multiple).toFixed(2)+'R'}</td><td>${escH(EXIT[t.exit_reason]||t.exit_reason||'')}</td><td>${dur(t)}</td></tr>`).join('')+'</table>'+
+  (closed.length>histN?`<p style="margin:10px 0 0"><button class="t" type="button" id="btMore">Show more (${closed.length-histN} older)</button></p>`:'')}
+function paintLog(){
+  $('btLog').innerHTML=acts.length?acts.map(a=>`<div class="${escH(a.level)}"><span class="t0">${utcs(a.ts)}</span><span class="k">${escH(a.kind)}</span><span class="m">${escH(a.message)}</span></div>`).join(''):'<p class="note" style="margin:10px 0 0">No activity yet. Start the bot and its decisions will be logged here.</p>'}
+function tick(){
+  if(!uid||!st)return;
+  document.querySelectorAll('#autobot [data-age]').forEach(e=>e.textContent=agoIso(e.dataset.age));
+  if(st.last_run_at)paintHead()}
+
+return{sync,refresh}})();
+window.TMBot=TMBot;TMBot.sync();
+</script>
+</body></html>
