@@ -1,0 +1,8 @@
+# Add these blocks to your existing supabase/config.toml (do not replace the file).
+# JWT verification is done inside the functions (bot-control verifies the user session via Supabase Auth,
+# bot-worker verifies a shared secret), which is also the recommended setup for publishable keys.
+[functions.bot-control]
+verify_jwt = false
+
+[functions.bot-worker]
+verify_jwt = false
